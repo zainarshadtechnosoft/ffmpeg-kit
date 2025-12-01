@@ -268,7 +268,6 @@ See our [CONTRIBUTING](CONTRIBUTING.md) guide.
 - [FFmpeg Wiki](https://trac.ffmpeg.org/wiki/WikiStart)
 - [FFmpeg External Library Licenses](https://www.ffmpeg.org/doxygen/4.0/md_LICENSE.html)
 
-
 ---
 
 # FFmpeg-Kit Universal
@@ -600,3 +599,7 @@ npm publish --registry=https://your-private-registry.com
 
 - LGPL-3.0 for most modules
 - GPL-3.0 for `full-gpl` module (includes GPL libraries like x264, x265)
+
+### Github flow
+ - To enable github work flow rename ._github to .github
+
