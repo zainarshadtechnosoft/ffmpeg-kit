@@ -3,3 +3,5 @@
 /prebuilt/
 .DS_Store
 .idea
+/ffmpeg-kit-builds/
+/ffmpeg-kit-universal/

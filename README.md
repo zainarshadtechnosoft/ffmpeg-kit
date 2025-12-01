@@ -267,3 +267,336 @@ See our [CONTRIBUTING](CONTRIBUTING.md) guide.
 - [FFmpeg API Documentation](https://ffmpeg.org/doxygen/4.0/index.html)
 - [FFmpeg Wiki](https://trac.ffmpeg.org/wiki/WikiStart)
 - [FFmpeg External Library Licenses](https://www.ffmpeg.org/doxygen/4.0/md_LICENSE.html)
+
+
+---
+
+# FFmpeg-Kit Universal
+
+Independent build of FFmpeg-Kit with all modules for React Native projects. This package provides pre-compiled FFmpeg libraries for iOS and Android, eliminating the need for external dependencies or third-party repositories.
+
+## 🎯 Features
+
+- **All Modules Included**: min, audio, video, https, full, full-gpl
+- **Independent Build**: No external repository dependencies
+- **Universal Package**: Single package for all your React Native projects
+- **Pre-compiled Binaries**: iOS XCFrameworks and Android native libraries
+- **Module Selection**: Choose only the modules you need
+- **Easy Integration**: Automated configuration scripts
+
+## 📋 System Requirements
+
+### macOS (for iOS/Android development)
+```bash
+# Required packages
+brew install git
+brew install node
+brew install npm
+brew install cocoapods
+brew install --cask android-studio
+
+# Xcode (from App Store)
+# Xcode Command Line Tools
+xcode-select --install
+
+# React Native CLI
+npm install -g react-native-cli
+# or
+npm install -g @react-native-community/cli
+```
+
+### Linux (for Android development only)
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install git nodejs npm openjdk-11-jdk wget unzip
+
+# CentOS/RHEL/Fedora
+sudo yum install git nodejs npm java-11-openjdk-devel wget unzip
+# or on newer versions:
+sudo dnf install git nodejs npm java-11-openjdk-devel wget unzip
+
+# Android SDK/NDK setup
+# Download Android Studio or SDK tools
+# Set environment variables:
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+# React Native CLI
+npm install -g react-native-cli
+```
+
+## 🚀 Quick Start
+
+### 1. Build the Universal Package
+
+```bash
+# Clone the ffmpeg-kit repository
+git clone https://github.com/your-repo/ffmpeg-kit-16KB.git
+cd ffmpeg-kit-16KB
+
+# Create the universal package
+./create-universal-package.sh
+```
+
+This will create a `ffmpeg-kit-universal` directory with all modules and platforms.
+
+### 2. Install in Your React Native Project
+
+```bash
+# Navigate to your React Native project
+cd /path/to/your/react-native-project
+
+# Remove any existing ffmpeg-kit packages
+npm uninstall ffmpeg-kit-react-native ffmpeg-kit-react-native-audio
+
+# Install the universal package
+npm install /path/to/ffmpeg-kit-16KB/ffmpeg-kit-universal/ReactNative --legacy-peer-deps
+
+# Configure the module you want to use
+npx ffmpeg-kit-universal install-module audio
+```
+
+### 3. Configure iOS (macOS only)
+
+```bash
+# Follow the generated configuration in ffmpeg-kit-ios-config.txt
+# Or manually add to ios/Podfile:
+
+pod 'ffmpeg-kit-react-native-universal/audio', :path => '../node_modules/ffmpeg-kit-universal/ReactNative'
+
+# Install pods
+cd ios
+pod install
+cd ..
+```
+
+### 4. Configure Android
+
+```bash
+# Follow the generated configuration in ffmpeg-kit-android-config.txt
+# Or manually configure:
+
+# 1. Add to android/settings.gradle:
+include ':ffmpeg-kit-universal'
+project(':ffmpeg-kit-universal').projectDir = new File(rootProject.projectDir, '../node_modules/ffmpeg-kit-universal/ReactNative/android')
+
+# 2. Add to android/app/build.gradle dependencies:
+dependencies {
+    implementation project(':ffmpeg-kit-universal')
+}
+
+# 3. Add to android/app/build.gradle android section:
+android {
+    sourceSets {
+        main {
+            jniLibs.srcDirs += ["../../node_modules/ffmpeg-kit-universal/Android/audio/libs"]
+        }
+    }
+}
+```
+
+### 5. Update Your Code
+
+```javascript
+// Import the universal package
+import { FFmpegKit, FFprobeKit, ReturnCode } from 'ffmpeg-kit-universal';
+
+// Example usage
+const convertAudio = async () => {
+  const session = await FFmpegKit.execute('-i input.mp3 -c:a aac output.aac');
+  const returnCode = await session.getReturnCode();
+  
+  if (ReturnCode.isSuccess(returnCode)) {
+    console.log('✅ Conversion successful!');
+  } else {
+    console.log('❌ Conversion failed');
+  }
+};
+```
+
+## 📦 Available Modules
+
+| Module | Size | Description | Features |
+|--------|------|-------------|----------|
+| `min` | ~30MB | Basic functionality | iOS AudioToolbox, VideoToolbox, Core codecs |
+| `audio` | ~45MB | Audio processing | MP3, AAC, Opus, Vorbis, Speex, Audio filters |
+| `video` | ~60MB | Video processing | WebP, LibASS, FontConfig, FreeType, VP8/VP9 |
+| `https` | ~50MB | Network streaming | HTTPS/TLS, GnuTLS, Secure protocols |
+| `full` | ~80MB | Complete LGPL | All non-GPL libraries, Maximum compatibility |
+| `full-gpl` | ~90MB | Complete with GPL | x264, x265, XviD, All features |
+
+## 🛠 Build Scripts
+
+### Main Build Script
+```bash
+# Location: /path/to/ffmpeg-kit-16KB/create-universal-package.sh
+# Purpose: Creates the universal package with all modules and platforms
+# Usage:
+./create-universal-package.sh
+```
+
+### Module Installer Script
+```bash
+# Location: Inside the generated package
+# Purpose: Configures a specific module for your project
+# Usage:
+npx ffmpeg-kit-universal install-module <module-name>
+
+# Examples:
+npx ffmpeg-kit-universal install-module audio
+npx ffmpeg-kit-universal install-module full-gpl
+npx ffmpeg-kit-universal help
+```
+
+## 📁 Package Structure
+
+```
+ffmpeg-kit-universal/
+├── iOS/                           # iOS XCFrameworks
+│   ├── audio/                     # Audio module frameworks
+│   ├── video/                     # Video module frameworks
+│   ├── full/                      # Full module frameworks
+│   └── ...                        # Other modules
+├── Android/                       # Android native libraries
+│   ├── audio/libs/                # Audio module .so files
+│   │   ├── arm64-v8a/            # ARM64 libraries
+│   │   ├── armeabi-v7a/          # ARM libraries
+│   │   ├── x86/                  # x86 libraries
+│   │   └── x86_64/               # x86_64 libraries
+│   └── ...                        # Other modules
+└── ReactNative/                   # React Native package
+    ├── src/                       # TypeScript/JavaScript source
+    ├── ios/                       # iOS bridge files
+    ├── android/                   # Android bridge files
+    ├── package.json               # npm package configuration
+    ├── ffmpeg-kit-react-native-universal.podspec
+    └── install-module.js          # CLI installer
+```
+
+## 🔧 Commands Reference
+
+### Essential Commands
+
+```bash
+# Build universal package
+cd /path/to/ffmpeg-kit-16KB
+./create-universal-package.sh
+
+# Install in React Native project
+npm install /path/to/ffmpeg-kit-16KB/ffmpeg-kit-universal/ReactNative --legacy-peer-deps
+
+# Configure module
+npx ffmpeg-kit-universal install-module audio
+
+# iOS setup
+cd ios && pod install && cd ..
+
+# Android setup (follow generated config files)
+# Build project
+npx react-native run-ios
+npx react-native run-android
+```
+
+### Troubleshooting Commands
+
+```bash
+# Clean iOS
+cd ios
+rm -rf Pods Podfile.lock DerivedData
+pod install --repo-update
+cd ..
+
+# Clean Android
+cd android
+./gradlew clean
+cd ..
+
+# Clean React Native
+rm -rf node_modules
+npm install
+
+# Verify package installation
+ls -la node_modules/ffmpeg-kit-universal
+```
+
+## 🎯 Usage Examples
+
+### Basic Audio Conversion
+```javascript
+import { FFmpegKit } from 'ffmpeg-kit-universal';
+
+const convertAudio = async () => {
+  await FFmpegKit.execute('-i input.mp3 -c:a aac output.aac');
+};
+```
+
+### Get Media Information
+```javascript
+import { FFprobeKit } from 'ffmpeg-kit-universal';
+
+const getMediaInfo = async () => {
+  const session = await FFprobeKit.getMediaInformation('video.mp4');
+  const info = await session.getMediaInformation();
+  console.log('Duration:', info.getDuration());
+};
+```
+
+### Video Processing (video module)
+```javascript
+import { FFmpegKit } from 'ffmpeg-kit-universal';
+
+const convertVideo = async () => {
+  await FFmpegKit.execute('-i input.mp4 -c:v libx264 -c:a aac output.mp4');
+};
+```
+
+## ⚠️ Important Notes
+
+1. **Module Selection**: Choose the smallest module that meets your needs to minimize app size
+2. **iOS Requirements**: Requires Xcode and macOS for iOS development
+3. **Android Requirements**: Works on macOS, Linux, and Windows
+4. **Legacy Peer Deps**: Always use `--legacy-peer-deps` flag when installing
+5. **Clean Builds**: Always clean previous builds when switching modules
+
+## 🚀 Distribution
+
+To distribute this package to colleagues:
+
+1. **Share the Repository**:
+```bash
+git clone https://github.com/your-repo/ffmpeg-kit-16KB.git
+cd ffmpeg-kit-16KB
+./create-universal-package.sh
+```
+
+2. **Share the Built Package**:
+```bash
+# Compress the built package
+tar -czf ffmpeg-kit-universal.tar.gz ffmpeg-kit-universal/
+# Share ffmpeg-kit-universal.tar.gz
+
+# Extract and use
+tar -xzf ffmpeg-kit-universal.tar.gz
+npm install ./ffmpeg-kit-universal/ReactNative --legacy-peer-deps
+```
+
+3. **Publish to Private NPM** (Optional):
+```bash
+cd ffmpeg-kit-universal/ReactNative
+npm publish --registry=https://your-private-registry.com
+```
+
+## 📞 Support
+
+- Generated configuration files: `ffmpeg-kit-ios-config.txt`, `ffmpeg-kit-android-config.txt`
+- Usage examples: `ffmpeg-kit-usage-example.js`
+- Module help: `npx ffmpeg-kit-universal help`
+
+## 📄 License
+
+- LGPL-3.0 for most modules
+- GPL-3.0 for `full-gpl` module (includes GPL libraries like x264, x265)
